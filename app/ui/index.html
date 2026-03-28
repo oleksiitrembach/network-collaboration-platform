@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Network Collaboration Platform - UAT UI</title>
+  <title>Network Collaboration Platform</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -86,51 +86,51 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>UAT Panel</h1>
-    <p>Prosty interfejs do testowania REST, GraphQL, WebSocket i RBAC bez przepisywania komend.</p>
-    <p class="muted">Swagger: <a href="/docs" target="_blank" style="color:#67e8f9;">/docs</a></p>
+    <h1>Network Collaboration Platform</h1>
+    <p>Prosty panel aplikacji do pracy z kontem, zadaniami i komunikacja w czasie rzeczywistym.</p>
+    <p class="muted">Swagger (surowe API): <a href="/docs" target="_blank" style="color:#67e8f9;">/docs</a></p>
 
     <div class="grid">
       <section class="card">
-        <h2>1) Login</h2>
+        <h2>1) Sesja</h2>
         <div class="row">
           <input id="loginUser" value="admin" placeholder="username" />
           <input id="loginPass" value="Admin123!" placeholder="password" type="password" />
         </div>
-        <button id="btnLogin">Login</button>
+        <button id="btnLogin">Zaloguj</button>
         <p class="muted">Token zapisuje sie lokalnie (localStorage).</p>
         <p id="authStatus" class="status warn">Brak tokenu</p>
       </section>
 
       <section class="card">
-        <h2>2) Health</h2>
-        <button id="btnHealth">GET /api/v1/health</button>
+        <h2>2) Status systemu</h2>
+        <button id="btnHealth">Sprawdz status</button>
         <p id="healthStatus" class="status warn">Nie sprawdzono</p>
       </section>
 
       <section class="card">
-        <h2>3) Create Task</h2>
+        <h2>3) Nowe zadanie</h2>
         <div class="row">
-          <input id="taskTitle" value="UAT task" placeholder="title" />
-          <input id="taskDesc" value="created from UI" placeholder="description" />
+          <input id="taskTitle" value="Zadanie demonstracyjne" placeholder="title" />
+          <input id="taskDesc" value="utworzone z panelu aplikacji" placeholder="description" />
         </div>
-        <button id="btnCreateTask">POST /api/v1/tasks</button>
+        <button id="btnCreateTask">Dodaj zadanie</button>
       </section>
 
       <section class="card">
-        <h2>4) List Tasks</h2>
-        <button id="btnListTasks">GET /api/v1/tasks</button>
+        <h2>4) Lista zadan</h2>
+        <button id="btnListTasks">Odswiez liste</button>
       </section>
 
       <section class="card">
         <h2>5) GraphQL</h2>
         <textarea id="gqlQuery">query { me { username role } tasks { id title owner } }</textarea>
-        <button id="btnGraphql">POST /graphql</button>
+        <button id="btnGraphql">Pobierz dane</button>
       </section>
 
       <section class="card">
-        <h2>6) Audit Logs (admin)</h2>
-        <button id="btnAudit">GET /api/v1/admin/audit-logs</button>
+        <h2>6) Dziennik zdarzen (admin)</h2>
+        <button id="btnAudit">Pokaz zdarzenia</button>
       </section>
 
       <section class="card wide">
@@ -143,7 +143,7 @@
       </section>
 
       <section class="card wide">
-        <h2>Output</h2>
+        <h2>Konsola aplikacji</h2>
         <pre id="out"></pre>
       </section>
     </div>
@@ -163,11 +163,11 @@
     }
 
     function getToken() {
-      return localStorage.getItem("uat_token") || "";
+      return localStorage.getItem("app_token") || "";
     }
 
     function setToken(token) {
-      localStorage.setItem("uat_token", token);
+      localStorage.setItem("app_token", token);
       authStatus.textContent = token ? `Token ustawiony (${token.slice(0, 8)}...)` : "Brak tokenu";
       authStatus.className = token ? "status ok" : "status warn";
     }

@@ -59,9 +59,9 @@ docker compose up --build
 
 Stosowac przed pokazem, jezeli chcesz deterministycznie uzyskac pierwszego uzytkownika z rola `admin`.
 
-## 4. Manualny scenariusz UAT (uzytkownik koncowy)
+## 4. Manualny scenariusz testowy (uzytkownik koncowy)
 
-Alternatywa zalecana: otworz panel `https://127.0.0.1:8443/` i wykonaj kroki UAT z poziomu prostego UI (login, tasks, graphql, audit, websocket). Swagger (`/docs`) pozostaje dostepny jako narzedzie pomocnicze.
+Zalecana sciezka: otworz panel `https://127.0.0.1:8443/` i wykonaj kroki z poziomu UI aplikacji (login, tasks, graphql, audit, websocket). Swagger (`/docs`) pozostaje dostepny do surowego testowania endpointow.
 
 ### 4.1 Health check
 

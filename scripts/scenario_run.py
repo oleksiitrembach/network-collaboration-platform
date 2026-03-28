@@ -20,8 +20,8 @@ def print_step(title: str) -> None:
 def main() -> None:
     client = httpx.Client(verify=False, timeout=10.0)
     suffix = uuid.uuid4().hex[:8]
-    admin_name = f"uat_admin_{suffix}"
-    user_name = f"uat_user_{suffix}"
+    admin_name = f"admin_demo_{suffix}"
+    user_name = f"user_demo_{suffix}"
 
     print_step("1) Health")
     health = client.get(f"{BASE_URL}/api/v1/health")
@@ -52,7 +52,7 @@ def main() -> None:
     task = client.post(
         f"{BASE_URL}/api/v1/tasks",
         headers={"X-Auth-Token": admin_token},
-        json={"title": "UAT task", "description": "Walidacja end-to-end"},
+        json={"title": "Task demo", "description": "Walidacja end-to-end"},
     )
     print("status:", task.status_code)
     pprint(task.json())
@@ -93,7 +93,7 @@ def main() -> None:
         async with websockets.connect(url, ssl=ssl_context) as ws:
             connected = await ws.recv()
             print("connected event:", connected)
-            await ws.send("ping-uat")
+            await ws.send("ping-demo")
             echoed = await ws.recv()
             print("echo event:", echoed)
 
@@ -108,18 +108,18 @@ def main() -> None:
     s2.connect(("127.0.0.1", 9000))
     s1.recv(4096)
     s2.recv(4096)
-    s1.sendall(b"NICK:uat1\n")
-    s2.sendall(b"NICK:uat2\n")
+    s1.sendall(b"NICK:demo1\n")
+    s2.sendall(b"NICK:demo2\n")
     s1.recv(4096)
     s2.recv(4096)
-    s1.sendall(b"MSG:wiadomosc z UAT\n")
+    s1.sendall(b"MSG:wiadomosc testowa\n")
     s2.settimeout(2)
     message = ""
     start = time.time()
     while time.time() - start < 2:
         chunk = s2.recv(4096).decode("utf-8", errors="ignore")
-        if "[uat1] wiadomosc z UAT" in chunk:
-            message = "[uat1] wiadomosc z UAT"
+        if "[demo1] wiadomosc testowa" in chunk:
+            message = "[demo1] wiadomosc testowa"
             break
     if not message:
         message = "Nie wykryto oczekiwanego broadcastu w oknie czasowym"
@@ -129,7 +129,7 @@ def main() -> None:
     s1.close()
     s2.close()
 
-    print_step("UAT finished")
+    print_step("Scenario finished")
     print("Wszystkie kluczowe scenariusze wykonane.")
 
 
