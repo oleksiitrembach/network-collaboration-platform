@@ -7,3 +7,10 @@ venv/
 data/
 certs/cert.pem
 certs/key.pem
+
+# Private delivery/presentation documents
+docs/API_EXAMPLES.md
+docs/OPERATING_MANUAL_PL.md
+docs/PRESENTATION_GUIDE.md
+docs/FINAL_DEMO_GUIDE_PL.md
+docs/REPORT_FINAL_PL.md
