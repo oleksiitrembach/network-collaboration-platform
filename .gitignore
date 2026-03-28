@@ -14,3 +14,7 @@ docs/OPERATING_MANUAL_PL.md
 docs/PRESENTATION_GUIDE.md
 docs/FINAL_DEMO_GUIDE_PL.md
 docs/REPORT_FINAL_PL.md
+
+# Word documents
+*.docx
+generate_docx.py
