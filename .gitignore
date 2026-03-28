@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.env
+data/
+certs/cert.pem
+certs/key.pem
+
+# Internal/presentation-only artifacts (not intended for public repo)
+docs/PRESENTATION_GUIDE.md
+docs/OPERATING_MANUAL_PL.md
+docs/API_EXAMPLES.md
+scripts/uat_run.py

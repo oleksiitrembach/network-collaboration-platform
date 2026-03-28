@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.7.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.7.1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  api:
+    build: .
+    depends_on:
+      - kafka
+    environment:
+      API_HOST: 0.0.0.0
+      API_PORT: 8443
+      APP_DB_PATH: /app/data/app.db
+      TLS_CERT_PATH: /app/certs/cert.pem
+      TLS_KEY_PATH: /app/certs/key.pem
+      KAFKA_ENABLED: "true"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC_TASKS: tasks.events
+      KAFKA_TOPIC_AUDIT: security.audit
+    command: sh -c "python scripts/generate_certs.py && python -m app.run_https"
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./data:/app/data
+      - ./certs:/app/certs
+
+  tcp:
+    build: .
+    environment:
+      TCP_HOST: 0.0.0.0
+      TCP_PORT: 9000
+    command: python -m tcp.server
+    ports:
+      - "9000:9000"
+
+  notification-service:
+    build: .
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC_TASKS: tasks.events
+      KAFKA_TOPIC_AUDIT: security.audit
+    command: python -m services.notification_consumer
+
+  analytics-service:
+    build: .
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC_TASKS: tasks.events
+      KAFKA_TOPIC_AUDIT: security.audit
+    command: python -m services.analytics_consumer
