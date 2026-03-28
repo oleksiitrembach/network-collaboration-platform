@@ -59,7 +59,7 @@
 
 ## 6) Spelnienie wymagan z PDF
 
-1. Wlasna implementacja klient-serwer TCP/UDP socket
+1. Wlasna implementacja klient-serwer na socketach (wariant TCP)
 - `tcp/server.py`, `tcp/client.py` (TCP sockets).
 
 2. Serwer HTTP (REST API)

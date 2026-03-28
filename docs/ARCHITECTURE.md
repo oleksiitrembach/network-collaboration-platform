@@ -1,7 +1,5 @@
 # Diagram architektury systemu
 
-## Infogram (Mermaid)
-
 ```mermaid
 flowchart TB
     subgraph Clients[Klienci]
@@ -61,7 +59,7 @@ flowchart TB
 
 6. Apache Kafka
 - Publikacja zdarzen asynchronicznych (`tasks.events`, `security.audit`).
-- Integracja z API w trybie opcjonalnym (dzialanie bez brokera nie powoduje awarii aplikacji).
+- Integracja uruchamiana standardowo w srodowisku Docker Compose wraz z konsumentami zdarzen.
 
 7. Notification Service
 - Konsument zdarzen Kafki uruchamiany jako osobny serwis kontenerowy.

@@ -26,7 +26,7 @@ Kompletny projekt akademicki spelniajacy wymagania kursu Programowanie Aplikacji
 - `app/events.py` - publikacja zdarzen do Kafka
 - `tcp/` - niskopoziomowy serwer i klient TCP oparty na socketach
 - `docs/` - dokumentacja architektury, analiza, scenariusz prezentacji
-- `scripts/` - skrypty uruchamiania i generowania certyfikatow
+- `scripts/` - narzedzia pomocnicze (np. generowanie certyfikatow)
 - `tests/` - testy automatyczne API
 - `certs/` - certyfikat i klucz TLS (self-signed)
 - `Dockerfile`, `docker-compose.yml` - konteneryzacja uslug
@@ -64,21 +64,11 @@ docker compose up --build
 
 ## Testy
 
-Testy aplikacyjne mozna uruchamiac lokalnie w srodowisku Pythona:
+Testy aplikacyjne uruchamiane sa w kontenerze API:
 
 ```bash
-pytest -q
+docker compose run --rm -e PYTHONPATH=/app api pytest -q
 ```
-
-Albo w kontenerze API:
-
-```bash
-docker compose run --rm api pytest -q
-```
-
-## Tryb lokalny bez Dockera (opcjonalnie, tylko debug)
-
-Standardem projektu jest uruchamianie przez Docker Compose. Skrypty z katalogu `scripts/` sa pozostawione wylacznie do lokalnego debugowania.
 
 Uruchamiane uslugi:
 1. `api` - FastAPI HTTPS + REST + GraphQL + WebSocket
