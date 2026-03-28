@@ -70,15 +70,15 @@ curl -k https://127.0.0.1:8443/api/v1/health
 Oczekiwany efekt:
 - Kod `200` i odpowiedz ze statusem `ok`.
 
-### 4.2 Rejestracja konta administracyjnego
+### 4.2 Logowanie kontem administracyjnym (bootstrap)
 
 ```bash
-curl -k -X POST https://127.0.0.1:8443/api/v1/auth/register -H "Content-Type: application/json" -d "{\"username\":\"admin1\",\"password\":\"Secure123\"}"
+curl -k -X POST https://127.0.0.1:8443/api/v1/auth/login -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"Admin123!\"}"
 ```
 
 Oczekiwany efekt:
-- Kod `201`.
-- Odpowiedz zawiera `token` i role `admin` (przy czystej bazie).
+- Kod `200`.
+- Odpowiedz zawiera `token` i role `admin`.
 
 ### 4.3 Utworzenie zadania (REST)
 
@@ -149,7 +149,7 @@ Oczekiwany efekt:
 - Uruchom Docker Desktop i ponow polecenie `docker compose up --build`.
 
 3. Brak roli `admin` dla nowego konta
-- Wykonaj restart od czystego stanu: `docker compose down -v`.
+- Wykonaj login kontem bootstrapowym `admin` / `Admin123!`.
 
 ## 7. Checklist przed testami/obrona
 

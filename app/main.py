@@ -6,7 +6,14 @@ from fastapi import Depends, FastAPI, Header, HTTPException, WebSocket, WebSocke
 from sqlite3 import IntegrityError
 from strawberry.fastapi import GraphQLRouter
 
-from app.config import DB_PATH, KAFKA_TOPIC_AUDIT, KAFKA_TOPIC_TASKS
+from app.config import (
+    BOOTSTRAP_ADMIN_ENABLED,
+    BOOTSTRAP_ADMIN_PASSWORD,
+    BOOTSTRAP_ADMIN_USERNAME,
+    DB_PATH,
+    KAFKA_TOPIC_AUDIT,
+    KAFKA_TOPIC_TASKS,
+)
 from app.db import Database, User
 from app.events import EventPublisher
 from app.graphql_api import build_context_factory, schema
@@ -32,7 +39,12 @@ async def app_lifespan(app: FastAPI):
             publisher.close()
 
 
-def create_app(db_path: str = DB_PATH) -> FastAPI:
+def create_app(
+    db_path: str = DB_PATH,
+    bootstrap_admin_enabled: bool = BOOTSTRAP_ADMIN_ENABLED,
+    bootstrap_admin_username: str = BOOTSTRAP_ADMIN_USERNAME,
+    bootstrap_admin_password: str = BOOTSTRAP_ADMIN_PASSWORD,
+) -> FastAPI:
     app = FastAPI(
         title="Network Collaboration Platform",
         version="1.0.0",
@@ -59,6 +71,15 @@ def create_app(db_path: str = DB_PATH) -> FastAPI:
                 "details": details,
             },
             key=actor,
+        )
+
+    if bootstrap_admin_enabled:
+        bootstrap_user = db.ensure_admin_user(bootstrap_admin_username, bootstrap_admin_password)
+        audit(
+            "auth.bootstrap",
+            bootstrap_user.username,
+            "ok",
+            "Automatycznie zapewniono konto administratora przy starcie aplikacji",
         )
 
     def get_current_user(x_auth_token: str = Header(alias="X-Auth-Token")) -> User:

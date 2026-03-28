@@ -11,7 +11,7 @@ from app.main import create_app
 
 def test_register_login_and_create_task(tmp_path: Path) -> None:
     db_path = str(tmp_path / "test.db")
-    app = create_app(db_path=db_path)
+    app = create_app(db_path=db_path, bootstrap_admin_enabled=False)
     client = TestClient(app)
 
     register_response = client.post(
@@ -54,7 +54,7 @@ def test_register_login_and_create_task(tmp_path: Path) -> None:
 
 def test_admin_endpoint_is_protected_by_role(tmp_path: Path) -> None:
     db_path = str(tmp_path / "rbac.db")
-    app = create_app(db_path=db_path)
+    app = create_app(db_path=db_path, bootstrap_admin_enabled=False)
     client = TestClient(app)
 
     admin_register = client.post(
@@ -85,7 +85,7 @@ def test_admin_endpoint_is_protected_by_role(tmp_path: Path) -> None:
 
 def test_graphql_queries_work_for_authenticated_user(tmp_path: Path) -> None:
     db_path = str(tmp_path / "graphql.db")
-    app = create_app(db_path=db_path)
+    app = create_app(db_path=db_path, bootstrap_admin_enabled=False)
     client = TestClient(app)
 
     register_response = client.post(
@@ -114,7 +114,7 @@ def test_graphql_queries_work_for_authenticated_user(tmp_path: Path) -> None:
 
 def test_websocket_requires_valid_token(tmp_path: Path) -> None:
     db_path = str(tmp_path / "ws.db")
-    app = create_app(db_path=db_path)
+    app = create_app(db_path=db_path, bootstrap_admin_enabled=False)
     client = TestClient(app)
 
     with pytest.raises(Exception):

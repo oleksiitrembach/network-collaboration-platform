@@ -20,3 +20,7 @@ KAFKA_ENABLED = os.getenv("KAFKA_ENABLED", "false").lower() == "true"
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 KAFKA_TOPIC_TASKS = os.getenv("KAFKA_TOPIC_TASKS", "tasks.events")
 KAFKA_TOPIC_AUDIT = os.getenv("KAFKA_TOPIC_AUDIT", "security.audit")
+
+BOOTSTRAP_ADMIN_ENABLED = os.getenv("BOOTSTRAP_ADMIN_ENABLED", "false").lower() == "true"
+BOOTSTRAP_ADMIN_USERNAME = os.getenv("BOOTSTRAP_ADMIN_USERNAME", "admin")
+BOOTSTRAP_ADMIN_PASSWORD = os.getenv("BOOTSTRAP_ADMIN_PASSWORD", "Admin123!")

@@ -110,6 +110,27 @@ class Database:
             con.commit()
             return User(id=cursor.lastrowid, username=username, role=role)
 
+    def ensure_admin_user(self, username: str, password: str) -> User:
+        password_hash = self._hash_password(password)
+        with self._lock, self._connect() as con:
+            self._ensure_role_column(con)
+            existing = con.execute(
+                "SELECT id, username, role FROM users WHERE username = ?",
+                (username,),
+            ).fetchone()
+            if existing is not None:
+                if existing["role"] != "admin":
+                    con.execute("UPDATE users SET role = 'admin' WHERE id = ?", (existing["id"],))
+                    con.commit()
+                return User(id=existing["id"], username=existing["username"], role="admin")
+
+            cursor = con.execute(
+                "INSERT INTO users(username, password_hash, role) VALUES (?, ?, 'admin')",
+                (username, password_hash),
+            )
+            con.commit()
+            return User(id=cursor.lastrowid, username=username, role="admin")
+
     def authenticate_user(self, username: str, password: str) -> Optional[str]:
         password_hash = self._hash_password(password)
         with self._lock, self._connect() as con:

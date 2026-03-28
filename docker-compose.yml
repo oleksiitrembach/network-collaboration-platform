@@ -36,6 +36,9 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_TOPIC_TASKS: tasks.events
       KAFKA_TOPIC_AUDIT: security.audit
+      BOOTSTRAP_ADMIN_ENABLED: "true"
+      BOOTSTRAP_ADMIN_USERNAME: admin
+      BOOTSTRAP_ADMIN_PASSWORD: Admin123!
     command: sh -c "python scripts/generate_certs.py && python -m app.run_https"
     ports:
       - "8443:8443"
