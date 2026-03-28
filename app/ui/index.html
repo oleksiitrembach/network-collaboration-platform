@@ -6,20 +6,23 @@
   <title>Network Collaboration Platform</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --card: #1f2937;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #22d3ee;
-      --ok: #22c55e;
-      --warn: #f59e0b;
-      --err: #ef4444;
+      --bg: #111111;
+      --surface: #1a1a1a;
+      --card: #202020;
+      --border: #3a3a3a;
+      --text: #f1f1f1;
+      --muted: #b3b3b3;
+      --input: #141414;
+      --button: #2a2a2a;
+      --button-hover: #353535;
+      --ok: #d1d5db;
+      --warn: #a3a3a3;
+      --err: #ffffff;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: radial-gradient(circle at top right, #1e3a8a 0%, var(--bg) 45%);
+      background: var(--bg);
       color: var(--text);
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -37,9 +40,9 @@
       margin-top: 18px;
     }
     .card {
-      background: color-mix(in srgb, var(--card) 92%, black);
-      border: 1px solid #374151;
-      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
       padding: 14px;
     }
     .card h2 { margin: 0 0 10px; font-size: 18px; }
@@ -51,9 +54,9 @@
     }
     input, textarea, button {
       width: 100%;
-      border-radius: 8px;
-      border: 1px solid #4b5563;
-      background: #0b1220;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--input);
       color: var(--text);
       padding: 10px;
       font: inherit;
@@ -61,19 +64,19 @@
     textarea { min-height: 130px; resize: vertical; }
     button {
       cursor: pointer;
-      background: linear-gradient(90deg, #0891b2, #2563eb);
-      border: none;
+      background: var(--button);
       font-weight: 600;
     }
+    button:hover { background: var(--button-hover); }
     .muted { color: var(--muted); font-size: 13px; }
     .status { font-weight: 700; }
     .status.ok { color: var(--ok); }
     .status.warn { color: var(--warn); }
     .status.err { color: var(--err); }
     pre {
-      background: #030712;
-      border: 1px solid #1f2937;
-      border-radius: 10px;
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       padding: 10px;
       overflow: auto;
       min-height: 160px;
@@ -88,7 +91,7 @@
   <div class="wrap">
     <h1>Network Collaboration Platform</h1>
     <p>Prosty panel aplikacji do pracy z kontem, zadaniami i komunikacja w czasie rzeczywistym.</p>
-    <p class="muted">Swagger (surowe API): <a href="/docs" target="_blank" style="color:#67e8f9;">/docs</a></p>
+    <p class="muted">Swagger (surowe API): <a href="/docs" target="_blank" style="color:#ffffff;">/docs</a></p>
 
     <div class="grid">
       <section class="card">
