@@ -105,3 +105,5 @@ Uruchamiane uslugi:
 3. Przewodnik obrony: `docs/PRESENTATION_GUIDE.md`
 4. Przyklady wywolan: `docs/API_EXAMPLES.md`
 5. Instrukcja operacyjna krok po kroku: `docs/OPERATING_MANUAL_PL.md`
+6. Raport koncowy pod oddanie: `docs/REPORT_FINAL_PL.md`
+7. Ostateczna instrukcja pokazu aplikacji: `docs/FINAL_DEMO_GUIDE_PL.md`
