@@ -33,84 +33,52 @@ Kompletny projekt akademicki spelniajacy wymagania kursu Programowanie Aplikacji
 
 ## Wymagania systemowe
 
-1. Python 3.11+
+1. Docker Desktop (Windows/macOS) lub Docker Engine + Docker Compose (Linux).
 
-## Instrukcja uruchomienia (Windows)
+## Uruchomienie (Docker Compose - tryb domyslny)
 
-1. Instalacja zaleznosci:
-
-```powershell
-C:/Users/alexp/AppData/Local/Python/pythoncore-3.14-64/python.exe -m pip install -r requirements.txt
-```
-
-2. Generowanie certyfikatow:
-
-```powershell
-./scripts/generate_certs.ps1
-```
-
-3. Start API HTTPS:
-
-```powershell
-./scripts/run_api.ps1
-```
-
-4. Start TCP server (drugi terminal):
-
-```powershell
-./scripts/run_tcp_server.ps1
-```
-
-5. Start TCP client (trzeci terminal):
-
-```powershell
-./scripts/run_tcp_client.ps1
-```
-
-## Instrukcja uruchomienia (Linux)
-
-1. Instalacja zaleznosci:
+1. Zbuduj i uruchom wszystkie uslugi:
 
 ```bash
-python -m pip install -r requirements.txt
+docker compose up --build
 ```
 
-2. Generowanie certyfikatow:
+2. Dzialanie w tle:
 
 ```bash
-chmod +x scripts/*.sh
-./scripts/generate_certs.sh
+docker compose up -d --build
 ```
 
-3. Start API HTTPS:
+3. Zatrzymanie stosu:
 
 ```bash
-./scripts/run_api.sh
+docker compose down
 ```
 
-4. Start TCP server:
+4. Restart od czystego stanu (usuniecie wolumenow):
 
 ```bash
-./scripts/run_tcp_server.sh
-```
-
-5. Start TCP client:
-
-```bash
-./scripts/run_tcp_client.sh
+docker compose down -v
+docker compose up --build
 ```
 
 ## Testy
+
+Testy aplikacyjne mozna uruchamiac lokalnie w srodowisku Pythona:
 
 ```bash
 pytest -q
 ```
 
-## Uruchomienie kontenerowe (Docker Compose)
+Albo w kontenerze API:
 
 ```bash
-docker compose up --build
+docker compose run --rm api pytest -q
 ```
+
+## Tryb lokalny bez Dockera (opcjonalnie, tylko debug)
+
+Standardem projektu jest uruchamianie przez Docker Compose. Skrypty z katalogu `scripts/` sa pozostawione wylacznie do lokalnego debugowania.
 
 Uruchamiane uslugi:
 1. `api` - FastAPI HTTPS + REST + GraphQL + WebSocket
