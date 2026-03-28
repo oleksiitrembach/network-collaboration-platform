@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Network Collaboration Platform - UAT UI</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --card: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #22d3ee;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --err: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top right, #1e3a8a 0%, var(--bg) 45%);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 { margin: 0 0 8px; }
+    p { color: var(--muted); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .card {
+      background: color-mix(in srgb, var(--card) 92%, black);
+      border: 1px solid #374151;
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .card h2 { margin: 0 0 10px; font-size: 18px; }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    input, textarea, button {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: #0b1220;
+      color: var(--text);
+      padding: 10px;
+      font: inherit;
+    }
+    textarea { min-height: 130px; resize: vertical; }
+    button {
+      cursor: pointer;
+      background: linear-gradient(90deg, #0891b2, #2563eb);
+      border: none;
+      font-weight: 600;
+    }
+    .muted { color: var(--muted); font-size: 13px; }
+    .status { font-weight: 700; }
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+    .status.err { color: var(--err); }
+    pre {
+      background: #030712;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 10px;
+      overflow: auto;
+      min-height: 160px;
+      max-height: 380px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .wide { grid-column: 1 / -1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>UAT Panel</h1>
+    <p>Prosty interfejs do testowania REST, GraphQL, WebSocket i RBAC bez przepisywania komend.</p>
+    <p class="muted">Swagger: <a href="/docs" target="_blank" style="color:#67e8f9;">/docs</a></p>
+
+    <div class="grid">
+      <section class="card">
+        <h2>1) Login</h2>
+        <div class="row">
+          <input id="loginUser" value="admin" placeholder="username" />
+          <input id="loginPass" value="Admin123!" placeholder="password" type="password" />
+        </div>
+        <button id="btnLogin">Login</button>
+        <p class="muted">Token zapisuje sie lokalnie (localStorage).</p>
+        <p id="authStatus" class="status warn">Brak tokenu</p>
+      </section>
+
+      <section class="card">
+        <h2>2) Health</h2>
+        <button id="btnHealth">GET /api/v1/health</button>
+        <p id="healthStatus" class="status warn">Nie sprawdzono</p>
+      </section>
+
+      <section class="card">
+        <h2>3) Create Task</h2>
+        <div class="row">
+          <input id="taskTitle" value="UAT task" placeholder="title" />
+          <input id="taskDesc" value="created from UI" placeholder="description" />
+        </div>
+        <button id="btnCreateTask">POST /api/v1/tasks</button>
+      </section>
+
+      <section class="card">
+        <h2>4) List Tasks</h2>
+        <button id="btnListTasks">GET /api/v1/tasks</button>
+      </section>
+
+      <section class="card">
+        <h2>5) GraphQL</h2>
+        <textarea id="gqlQuery">query { me { username role } tasks { id title owner } }</textarea>
+        <button id="btnGraphql">POST /graphql</button>
+      </section>
+
+      <section class="card">
+        <h2>6) Audit Logs (admin)</h2>
+        <button id="btnAudit">GET /api/v1/admin/audit-logs</button>
+      </section>
+
+      <section class="card wide">
+        <h2>7) WebSocket</h2>
+        <div class="row">
+          <button id="btnWsConnect">Connect WS</button>
+          <button id="btnWsDisconnect">Disconnect WS</button>
+        </div>
+        <p id="wsStatus" class="status warn">Rozlaczony</p>
+      </section>
+
+      <section class="card wide">
+        <h2>Output</h2>
+        <pre id="out"></pre>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const out = document.getElementById("out");
+    const authStatus = document.getElementById("authStatus");
+    const healthStatus = document.getElementById("healthStatus");
+    const wsStatus = document.getElementById("wsStatus");
+    let ws = null;
+
+    function print(label, payload) {
+      const ts = new Date().toISOString();
+      const body = typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
+      out.textContent = `[${ts}] ${label}\n${body}\n\n` + out.textContent;
+    }
+
+    function getToken() {
+      return localStorage.getItem("uat_token") || "";
+    }
+
+    function setToken(token) {
+      localStorage.setItem("uat_token", token);
+      authStatus.textContent = token ? `Token ustawiony (${token.slice(0, 8)}...)` : "Brak tokenu";
+      authStatus.className = token ? "status ok" : "status warn";
+    }
+
+    async function api(path, method = "GET", body = null, useAuth = true) {
+      const headers = { "Content-Type": "application/json" };
+      const token = getToken();
+      if (useAuth && token) headers["X-Auth-Token"] = token;
+      const res = await fetch(path, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null,
+      });
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch { json = text; }
+      print(`${method} ${path} -> ${res.status}`, json);
+      return { status: res.status, data: json };
+    }
+
+    document.getElementById("btnLogin").onclick = async () => {
+      const username = document.getElementById("loginUser").value.trim();
+      const password = document.getElementById("loginPass").value;
+      const r = await api("/api/v1/auth/login", "POST", { username, password }, false);
+      if (r.status === 200 && r.data.token) setToken(r.data.token);
+    };
+
+    document.getElementById("btnHealth").onclick = async () => {
+      const r = await api("/api/v1/health", "GET", null, false);
+      const ok = r.status === 200;
+      healthStatus.textContent = ok ? "OK" : `Blad (${r.status})`;
+      healthStatus.className = ok ? "status ok" : "status err";
+    };
+
+    document.getElementById("btnCreateTask").onclick = async () => {
+      const title = document.getElementById("taskTitle").value;
+      const description = document.getElementById("taskDesc").value;
+      await api("/api/v1/tasks", "POST", { title, description });
+    };
+
+    document.getElementById("btnListTasks").onclick = async () => {
+      await api("/api/v1/tasks");
+    };
+
+    document.getElementById("btnGraphql").onclick = async () => {
+      const query = document.getElementById("gqlQuery").value;
+      await api("/graphql", "POST", { query });
+    };
+
+    document.getElementById("btnAudit").onclick = async () => {
+      await api("/api/v1/admin/audit-logs");
+    };
+
+    document.getElementById("btnWsConnect").onclick = () => {
+      const token = getToken();
+      if (!token) {
+        print("WS", "Brak tokenu - zaloguj sie najpierw");
+        return;
+      }
+      const protocol = location.protocol === "https:" ? "wss" : "ws";
+      const url = `${protocol}://${location.host}/ws/notifications?token=${encodeURIComponent(token)}`;
+      ws = new WebSocket(url);
+      ws.onopen = () => {
+        wsStatus.textContent = "Polaczony";
+        wsStatus.className = "status ok";
+        print("WS open", url);
+      };
+      ws.onmessage = (event) => print("WS message", event.data);
+      ws.onclose = () => {
+        wsStatus.textContent = "Rozlaczony";
+        wsStatus.className = "status warn";
+        print("WS", "Polaczenie zamkniete");
+      };
+      ws.onerror = () => {
+        wsStatus.textContent = "Blad WS";
+        wsStatus.className = "status err";
+      };
+    };
+
+    document.getElementById("btnWsDisconnect").onclick = () => {
+      if (ws) ws.close();
+    };
+
+    setToken(getToken());
+  </script>
+</body>
+</html>

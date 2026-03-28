@@ -61,6 +61,8 @@ Stosowac przed pokazem, jezeli chcesz deterministycznie uzyskac pierwszego uzytk
 
 ## 4. Manualny scenariusz UAT (uzytkownik koncowy)
 
+Alternatywa zalecana: otworz panel `https://127.0.0.1:8443/` i wykonaj kroki UAT z poziomu prostego UI (login, tasks, graphql, audit, websocket). Swagger (`/docs`) pozostaje dostepny jako narzedzie pomocnicze.
+
 ### 4.1 Health check
 
 ```bash

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi.responses import FileResponse
 from sqlite3 import IntegrityError
 from strawberry.fastapi import GraphQLRouter
 
@@ -53,6 +55,7 @@ def create_app(
     )
 
     db = Database(db_path)
+    ui_file_path = Path(__file__).resolve().parent / "ui" / "index.html"
     hub = WebSocketHub()
     publisher = EventPublisher()
     app.state.publisher = publisher
@@ -104,6 +107,10 @@ def create_app(
     @app.get("/api/v1/health", response_model=HealthResponse)
     def health() -> HealthResponse:
         return HealthResponse(status="ok", service="network-collaboration-platform")
+
+    @app.get("/", include_in_schema=False)
+    def ui() -> FileResponse:
+        return FileResponse(ui_file_path)
 
     @app.post("/api/v1/auth/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
     def register(payload: RegisterRequest) -> AuthResponse:

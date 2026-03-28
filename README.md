@@ -64,6 +64,7 @@ docker compose up --build
 
 ## Szybki dostep do backendu
 
+0. UAT UI (panel testowy): `https://127.0.0.1:8443/`
 1. Swagger UI: `https://127.0.0.1:8443/docs`
 2. OpenAPI JSON: `https://127.0.0.1:8443/openapi.json`
 3. Health: `https://127.0.0.1:8443/api/v1/health`
