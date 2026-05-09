@@ -15,9 +15,9 @@
       --input: #141414;
       --button: #2a2a2a;
       --button-hover: #353535;
-      --ok: #d1d5db;
-      --warn: #a3a3a3;
-      --err: #ffffff;
+      --ok: #4ade80;
+      --warn: #facc15;
+      --err: #f87171;
     }
     * { box-sizing: border-box; }
     body {
@@ -90,8 +90,8 @@
 <body>
   <div class="wrap">
     <h1>Network Collaboration Platform</h1>
-    <p>Prosty panel aplikacji do pracy z kontem, zadaniami i komunikacja w czasie rzeczywistym.</p>
-    <p class="muted">Swagger (surowe API): <a href="/docs" target="_blank" style="color:#ffffff;">/docs</a></p>
+    <p>Panel aplikacji oparty wylacznie na GraphQL + WebSocket + TCP.</p>
+    <p class="muted">GraphQL endpoint: <a href="/graphql" target="_blank" style="color:#4ade80;">/graphql</a></p>
 
     <div class="grid">
       <section class="card">
@@ -100,8 +100,10 @@
           <input id="loginUser" value="admin" placeholder="username" />
           <input id="loginPass" value="Admin123!" placeholder="password" type="password" />
         </div>
-        <button id="btnLogin">Zaloguj</button>
-        <p class="muted">Token zapisuje sie lokalnie (localStorage).</p>
+        <div class="row">
+          <button id="btnLogin">Zaloguj</button>
+          <button id="btnRegister">Zarejestruj</button>
+        </div>
         <p id="authStatus" class="status warn">Brak tokenu</p>
       </section>
 
@@ -126,9 +128,9 @@
       </section>
 
       <section class="card">
-        <h2>5) GraphQL</h2>
+        <h2>5) GraphQL (dowolne zapytanie)</h2>
         <textarea id="gqlQuery">query { me { username role } tasks { id title owner } }</textarea>
-        <button id="btnGraphql">Pobierz dane</button>
+        <button id="btnGraphql">Wykonaj zapytanie</button>
       </section>
 
       <section class="card">
@@ -169,10 +171,26 @@
       return localStorage.getItem("app_token") || "";
     }
 
-    function setToken(token) {
+    function setToken(token, username = "", role = "") {
       localStorage.setItem("app_token", token);
-      authStatus.textContent = token ? `Token ustawiony (${token.slice(0, 8)}...)` : "Brak tokenu";
+      authStatus.textContent = token ? `Zalogowany: ${username} (${role})` : "Brak tokenu";
       authStatus.className = token ? "status ok" : "status warn";
+    }
+
+    async function graphql(query, variables = null) {
+      const headers = { "Content-Type": "application/json" };
+      const token = getToken();
+      if (token) headers["X-Auth-Token"] = token;
+      const res = await fetch("/graphql", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ query, variables }),
+      });
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch { json = text; }
+      print(`GraphQL -> ${res.status}`, json);
+      return { status: res.status, data: json };
     }
 
     async function api(path, method = "GET", body = null, useAuth = true) {
@@ -191,11 +209,26 @@
       return { status: res.status, data: json };
     }
 
+    document.getElementById("btnRegister").onclick = async () => {
+      const username = document.getElementById("loginUser").value.trim();
+      const password = document.getElementById("loginPass").value;
+      const r = await graphql(
+        `mutation($u:String!,$p:String!){register(username:$u,password:$p){token username role}}`,
+        { u: username, p: password }
+      );
+      const payload = r.data && r.data.data && r.data.data.register ? r.data.data.register : null;
+      if (payload && payload.token) setToken(payload.token, payload.username, payload.role);
+    };
+
     document.getElementById("btnLogin").onclick = async () => {
       const username = document.getElementById("loginUser").value.trim();
       const password = document.getElementById("loginPass").value;
-      const r = await api("/api/v1/auth/login", "POST", { username, password }, false);
-      if (r.status === 200 && r.data.token) setToken(r.data.token);
+      const r = await graphql(
+        `mutation($u:String!,$p:String!){login(username:$u,password:$p){token username role}}`,
+        { u: username, p: password }
+      );
+      const payload = r.data && r.data.data && r.data.data.login ? r.data.data.login : null;
+      if (payload && payload.token) setToken(payload.token, payload.username, payload.role);
     };
 
     document.getElementById("btnHealth").onclick = async () => {
@@ -208,20 +241,23 @@
     document.getElementById("btnCreateTask").onclick = async () => {
       const title = document.getElementById("taskTitle").value;
       const description = document.getElementById("taskDesc").value;
-      await api("/api/v1/tasks", "POST", { title, description });
+      await graphql(
+        `mutation($t:String!,$d:String!){createTask(title:$t,description:$d){id title description owner createdAt}}`,
+        { t: title, d: description }
+      );
     };
 
     document.getElementById("btnListTasks").onclick = async () => {
-      await api("/api/v1/tasks");
+      await graphql(`query { tasks { id title description owner createdAt } }`);
     };
 
     document.getElementById("btnGraphql").onclick = async () => {
       const query = document.getElementById("gqlQuery").value;
-      await api("/graphql", "POST", { query });
+      await graphql(query);
     };
 
     document.getElementById("btnAudit").onclick = async () => {
-      await api("/api/v1/admin/audit-logs");
+      await graphql(`query { auditLogs(limit: 100) { id eventType actor result details createdAt } }`);
     };
 
     document.getElementById("btnWsConnect").onclick = () => {
@@ -254,7 +290,15 @@
       if (ws) ws.close();
     };
 
-    setToken(getToken());
+    // Restore session display
+    const savedToken = getToken();
+    if (savedToken) {
+      graphql(`query { me { username role } }`).then(r => {
+        const me = r.data && r.data.data && r.data.data.me;
+        if (me) setToken(savedToken, me.username, me.role);
+        else setToken("");
+      });
+    }
   </script>
 </body>
 </html>

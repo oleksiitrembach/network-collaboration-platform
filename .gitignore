@@ -1,20 +1,36 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
 .pytest_cache/
+
+# Virtual environments
 .venv/
 venv/
+env/
+
+# Environment variables
 .env
+
+# Local data & generated files
 data/
+*.db
+
+# TLS certificates (generated locally)
 certs/cert.pem
 certs/key.pem
 
-# Private delivery/presentation documents
-docs/API_EXAMPLES.md
-docs/OPERATING_MANUAL_PL.md
-docs/PRESENTATION_GUIDE.md
-docs/FINAL_DEMO_GUIDE_PL.md
-docs/REPORT_FINAL_PL.md
+# IDE
+.vscode/
+.idea/
 
-# Word documents
-*.docx
-generate_docx.py
+# Old documentation artifacts with personal data (do not commit)
+Dokumentacja_Techniczna_PAS_Trembach.docx
+
+# Course requirements PDF (confidential / identifying)
+Wymagania dotyczące projektu z przedmiotu (1).pdf
+
+# Temporary packaging artifacts
+Network-Collaboration-Platform/
+Network-Collaboration-Platform.zip

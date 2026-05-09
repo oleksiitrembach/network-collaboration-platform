@@ -1,109 +1,90 @@
-# Projekt PAS - Network Collaboration Platform
+# Network Collaboration Platform
 
-Kompletny projekt akademicki spelniajacy wymagania kursu Programowanie Aplikacji Sieciowych:
+A containerized network application demonstrating multiple communication protocols layered over TCP/IP:
 
-1. Wlasna implementacja TCP client-server na socketach.
-2. REST API po HTTP.
-3. HTTPS (TLS, self-signed cert).
-4. Architektura klient-serwer.
-5. Nowoczesny mechanizm komunikacji: WebSocket (realtime).
-6. GraphQL API do zapytan agregujacych.
-7. Apache Kafka do zdarzen asynchronicznych.
-8. Kontrola dostepu RBAC (role admin/user) i audit logging.
-9. Konteneryzacja Docker i Docker Compose.
-10. Dokumentacja architektury oraz analiza komunikacji.
+- **GraphQL API** over HTTPS — unified application interface (queries & mutations)
+- **WebSocket** (WSS) — real-time notifications
+- **Raw TCP sockets** — custom low-level chat protocol
+- **Apache Kafka** — asynchronous event streaming
+- **RBAC + Audit logging** — role-based access control and security event tracking
 
-## Funkcje bezpieczenstwa
+## Security Features
 
-1. RBAC: endpoint `GET /api/v1/admin/audit-logs` tylko dla roli admin.
-2. Audit log: rejestracja zdarzen auth, RBAC, tworzenia zadan i WebSocket.
-3. HTTPS/TLS: szyfrowanie komunikacji API i WebSocket.
+1. **RBAC**: `auditLogs` GraphQL resource restricted to the `admin` role.
+2. **Audit log**: persistent logging of authentication, authorization, task creation and WebSocket events.
+3. **HTTPS/TLS**: encrypted API and WebSocket traffic using self-signed certificates (suitable for local/demo environments).
 
-## Struktura projektu
+## Project Structure
 
-- `app/` - serwer aplikacyjny FastAPI (REST + WebSocket + auth + baza SQLite)
-- `app/graphql_api.py` - warstwa GraphQL
-- `app/events.py` - publikacja zdarzen do Kafka
-- `tcp/` - niskopoziomowy serwer i klient TCP oparty na socketach
-- `docs/` - dokumentacja architektury, analiza, scenariusz prezentacji
-- `scripts/` - narzedzia pomocnicze (np. generowanie certyfikatow)
-- `tests/` - testy automatyczne API
-- `certs/` - certyfikat i klucz TLS (self-signed)
-- `Dockerfile`, `docker-compose.yml` - konteneryzacja uslug
+- `app/` — FastAPI server (GraphQL + WebSocket + auth + SQLite)
+- `app/graphql_api.py` — GraphQL schema (Strawberry): queries & mutations
+- `app/events.py` — Kafka event publisher
+- `tcp/` — low-level threaded TCP chat server & client
+- `docs/` — architecture diagrams, protocol analysis, API examples
+- `scripts/` — helper utilities (certificate generation, demo scenarios)
+- `tests/` — automated API tests (pytest)
+- `certs/` — self-signed TLS certificate and key
+- `Dockerfile`, `docker-compose.yml` — full containerization
 
-## Wymagania systemowe
+## Requirements
 
-1. Docker Desktop (Windows/macOS) lub Docker Engine + Docker Compose (Linux).
+- Docker Desktop (Windows/macOS) or Docker Engine + Docker Compose (Linux)
 
-## Uruchomienie (Docker Compose - tryb domyslny)
+## Quick Start (Docker Compose)
 
-1. Zbuduj i uruchom wszystkie uslugi:
+Build and run the entire stack:
 
 ```bash
 docker compose up --build
 ```
 
-2. Dzialanie w tle:
+Run in background:
 
 ```bash
 docker compose up -d --build
 ```
 
-3. Zatrzymanie stosu:
+Stop:
 
 ```bash
 docker compose down
 ```
 
-4. Restart od czystego stanu (usuniecie wolumenow):
+Clean restart (removes volumes):
 
 ```bash
 docker compose down -v
 docker compose up --build
 ```
 
-## Szybki dostep do backendu
+## Access Points
 
-0. Panel aplikacji: `https://127.0.0.1:8443/`
-1. Swagger UI: `https://127.0.0.1:8443/docs`
-2. OpenAPI JSON: `https://127.0.0.1:8443/openapi.json`
-3. Health: `https://127.0.0.1:8443/api/v1/health`
+- Web UI: `https://127.0.0.1:8443/`
+- GraphQL endpoint: `https://127.0.0.1:8443/graphql`
+- Health check: `https://127.0.0.1:8443/api/v1/health`
 
-W trybie Docker domyslnie tworzony jest administrator bootstrapowy:
-1. login: `admin`
-2. haslo: `Admin123!`
+A bootstrap administrator is created automatically in Docker:
+- login: `admin`
+- password: `Admin123!`
 
-## Testy
-
-Testy aplikacyjne uruchamiane sa w kontenerze API:
+## Running Tests
 
 ```bash
 docker compose run --rm -e PYTHONPATH=/app api pytest -q
 ```
 
-Uruchamiane uslugi:
-1. `api` - FastAPI HTTPS + REST + GraphQL + WebSocket
-2. `tcp` - serwer TCP socket
-3. `kafka` + `zookeeper` - warstwa asynchroniczna
-4. `notification-service` - konsument eventow Kafki
-5. `analytics-service` - konsument eventow Kafki (agregacja licznikow)
+## Services Overview
 
-## Macierz zgodnosci z wymaganiami
+1. `api` — FastAPI HTTPS + GraphQL + WebSocket
+2. `tcp` — TCP socket chat server
+3. `kafka` + `zookeeper` — asynchronous messaging layer
+4. `notification-service` — Kafka consumer (event logging)
+5. `analytics-service` — Kafka consumer (topic counters)
 
-1. TCP client/server socket: zaimplementowano (`tcp/client.py`, `tcp/server.py`).
-2. REST API: zaimplementowano (`app/main.py`).
-3. HTTPS/TLS: zaimplementowano (`app/run_https.py`, `scripts/generate_certs.py`).
-4. WebSocket: zaimplementowano (`/ws/notifications`).
-5. GraphQL: zaimplementowano (`/graphql`, `app/graphql_api.py`).
-6. Message Queue (Kafka): zaimplementowano (`app/events.py`, `docker-compose.yml`).
-7. Audit log + RBAC: zaimplementowano (`app/db.py`, `app/main.py`).
+## Documentation
 
-## Dokumentacja
-
-1. Architektura i infogram: `docs/ARCHITECTURE.md`
-2. Analiza komunikacji TCP/IP: `docs/ANALYSIS.md`
-3. Przewodnik obrony: `docs/PRESENTATION_GUIDE.md`
-4. Przyklady wywolan: `docs/API_EXAMPLES.md`
-5. Instrukcja operacyjna krok po kroku: `docs/OPERATING_MANUAL_PL.md`
-6. Raport koncowy pod oddanie: `docs/REPORT_FINAL_PL.md`
-7. Ostateczna instrukcja pokazu aplikacji: `docs/FINAL_DEMO_GUIDE_PL.md`
+- Architecture & diagram: `docs/ARCHITECTURE.md`
+- Protocol analysis (TCP/IP layers, ports, stateful vs stateless): `docs/ANALYSIS.md`
+- API usage examples: `docs/API_EXAMPLES.md`
+- Operational manual: `docs/OPERATING_MANUAL_PL.md`
+- Showcase / demo guide: `docs/PRESENTATION_GUIDE.md`

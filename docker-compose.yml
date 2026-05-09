@@ -1,16 +1,29 @@
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.7.1
+    restart: unless-stopped
+    networks:
+      - pas-network
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "curl -sf http://localhost:8080/commands/ruok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   kafka:
     image: confluentinc/cp-kafka:7.7.1
+    restart: unless-stopped
+    networks:
+      - pas-network
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - "9092:9092"
     environment:
@@ -21,12 +34,23 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   api:
     build: .
+    restart: unless-stopped
+    networks:
+      - pas-network
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
+      PYTHONUNBUFFERED: "1"
       API_HOST: 0.0.0.0
       API_PORT: 8443
       APP_DB_PATH: /app/data/app.db
@@ -39,27 +63,64 @@ services:
       BOOTSTRAP_ADMIN_ENABLED: "true"
       BOOTSTRAP_ADMIN_USERNAME: admin
       BOOTSTRAP_ADMIN_PASSWORD: Admin123!
-    command: sh -c "python scripts/generate_certs.py && python -m app.run_https"
+    command: >
+      sh -c "python scripts/generate_certs.py && python -m app.run_https"
     ports:
       - "8443:8443"
     volumes:
       - ./data:/app/data
       - ./certs:/app/certs
+    healthcheck:
+      test:
+        - "CMD"
+        - "python"
+        - "-c"
+        - |
+          import urllib.request, ssl;
+          ctx = ssl._create_unverified_context();
+          urllib.request.urlopen('https://localhost:8443/api/v1/health', context=ctx, timeout=5)
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   tcp:
     build: .
+    restart: unless-stopped
+    networks:
+      - pas-network
     environment:
+      PYTHONUNBUFFERED: "1"
       TCP_HOST: 0.0.0.0
       TCP_PORT: 9000
     command: python -m tcp.server
     ports:
       - "9000:9000"
+    healthcheck:
+      test:
+        - "CMD"
+        - "python"
+        - "-c"
+        - |
+          import socket;
+          s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
+          s.connect(('localhost', 9000));
+          s.close()
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   notification-service:
     build: .
+    restart: unless-stopped
+    networks:
+      - pas-network
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
+      PYTHONUNBUFFERED: "1"
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_TOPIC_TASKS: tasks.events
       KAFKA_TOPIC_AUDIT: security.audit
@@ -67,10 +128,19 @@ services:
 
   analytics-service:
     build: .
+    restart: unless-stopped
+    networks:
+      - pas-network
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
+      PYTHONUNBUFFERED: "1"
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_TOPIC_TASKS: tasks.events
       KAFKA_TOPIC_AUDIT: security.audit
     command: python -m services.analytics_consumer
+
+networks:
+  pas-network:
+    driver: bridge
