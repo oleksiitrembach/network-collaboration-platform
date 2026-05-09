@@ -34,3 +34,8 @@ Wymagania dotyczące projektu z przedmiotu (1).pdf
 # Temporary packaging artifacts
 Network-Collaboration-Platform/
 Network-Collaboration-Platform.zip
+
+# Generated documentation artifacts
+generate_docx.py
+generate_detailed_docx.py
+Technical_Documentation.docx
