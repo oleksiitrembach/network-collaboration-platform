@@ -68,7 +68,7 @@ flowchart TB
 
 ---
 
-## Co sie dzieje "pod spodem" — notatka do prezentacji
+## Szczegółowy opis komponentów
 
 ### Hierarchia komponentow (stack technologiczny)
 
@@ -127,7 +127,7 @@ flowchart TB
 
 ---
 
-## Komendy do demonstracji "pod spodem"
+## Przykłady operacji i diagnostyki
 
 ### 1. Status kontenerow
 ```bash
